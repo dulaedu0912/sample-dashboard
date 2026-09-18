@@ -1,0 +1,14 @@
+# dependencies
+node_modules/
+dist/
+
+# vite
+*.local
+
+# editor
+.vscode/
+.idea/
+
+# env
+.env
+.env.local
