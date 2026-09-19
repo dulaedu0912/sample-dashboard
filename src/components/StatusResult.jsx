@@ -1,32 +1,40 @@
+import { CalendarDays, CheckCircle2, Loader2, XCircle } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card.jsx";
+import { Badge } from "./ui/badge.jsx";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert.jsx";
+import { Skeleton } from "./ui/skeleton.jsx";
+
 export function StatusResult({ result, loading, error, fallbackDate }) {
   if (loading) {
     return (
-      <p
-        role="status"
-        className="rounded-xl border border-slate-300 bg-white p-4 text-slate-700"
-      >
-        Checking availability...
-      </p>
+      <div role="status" aria-live="polite" className="space-y-2">
+        <div className="flex items-center gap-2 text-sm text-slate-600">
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          Checking availability...
+        </div>
+        <Skeleton className="h-28 w-full" />
+      </div>
     );
   }
 
   if (error) {
     return (
-      <div
-        role="alert"
-        className="rounded-xl border border-red-400 bg-red-50 p-4 text-red-900"
-      >
-        <p className="font-semibold">Could not check availability.</p>
-        <p>{error}</p>
-      </div>
+      <Alert variant="destructive">
+        <XCircle className="h-4 w-4" aria-hidden="true" />
+        <AlertTitle>Could not check availability.</AlertTitle>
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
     );
   }
 
   if (!result) {
     return (
-      <p className="rounded-xl border border-slate-300 bg-white p-4 text-slate-700">
-        Select a member and date, then check availability.
-      </p>
+      <Card className="border-dashed">
+        <CardContent className="flex items-center gap-2 p-4 text-sm text-slate-500">
+          <CalendarDays className="h-4 w-4" aria-hidden="true" />
+          Select a member and date, then check availability.
+        </CardContent>
+      </Card>
     );
   }
 
@@ -34,17 +42,11 @@ export function StatusResult({ result, loading, error, fallbackDate }) {
   const isAvailable = status === "available";
   const isBusy = status === "busy";
 
-  const containerClass = isAvailable
-    ? "border-emerald-500 bg-emerald-50 text-emerald-900"
+  const badgeVariant = isAvailable
+    ? "success"
     : isBusy
-      ? "border-red-400 bg-red-50 text-red-900"
-      : "border-slate-400 bg-slate-50 text-slate-800";
-
-  const dotClass = isAvailable
-    ? "bg-emerald-500"
-    : isBusy
-      ? "bg-red-500"
-      : "bg-slate-400";
+      ? "destructive"
+      : "secondary";
 
   const statusLabel = isAvailable
     ? "Available"
@@ -52,24 +54,49 @@ export function StatusResult({ result, loading, error, fallbackDate }) {
       ? "Busy"
       : result.status || "Unknown";
 
+  const accentClass = isAvailable
+    ? "border-l-4 border-l-emerald-500"
+    : isBusy
+      ? "border-l-4 border-l-red-500"
+      : "border-l-4 border-l-slate-400";
+
   return (
-    <div
-      role="status"
-      aria-live="polite"
-      className={`flex gap-3 rounded-xl border p-4 ${containerClass}`}
-    >
-      <span
-        aria-hidden="true"
-        className={`mt-1.5 h-3.5 w-3.5 shrink-0 rounded-full ${dotClass}`}
-      />
-      <div>
-        <p className="my-1">
-          <strong>{result.name}</strong> · {result.role}
+    <Card role="status" aria-live="polite" className={accentClass}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-base">
+          {result.name}{" "}
+          <span className="font-normal text-slate-500">· {result.role}</span>
+        </CardTitle>
+        <span className="flex items-center gap-2">
+          <span
+            aria-hidden="true"
+            className={
+              "h-3 w-3 rounded-full " +
+              (isAvailable
+                ? "bg-emerald-500"
+                : isBusy
+                  ? "bg-red-500"
+                  : "bg-slate-400")
+            }
+          />
+          <Badge variant={badgeVariant}>
+            {isAvailable && (
+              <CheckCircle2 className="mr-1 h-3 w-3" aria-hidden="true" />
+            )}
+            {statusLabel}
+          </Badge>
+        </span>
+      </CardHeader>
+      <CardContent className="space-y-1 text-sm">
+        <p className="text-slate-600">
+          Date: {result.requested_date || fallbackDate}
         </p>
-        <p className="my-1">Date: {result.requested_date || fallbackDate}</p>
-        <p className="my-1">Status: {statusLabel}</p>
-        {result.reason && <p className="my-1 font-semibold">{result.reason}</p>}
-      </div>
-    </div>
+        {result.reason && (
+          <p className={isBusy ? "font-medium text-red-900" : "text-slate-700"}>
+            {result.reason}
+          </p>
+        )}
+      </CardContent>
+    </Card>
   );
 }

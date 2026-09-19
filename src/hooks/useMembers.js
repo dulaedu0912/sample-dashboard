@@ -9,19 +9,13 @@ export function useMembers() {
   const load = useCallback(async (signal) => {
     setLoading(true);
     setError(null);
-
     try {
       const data = await getMembers(signal);
-      // API returns { count, members: [...] }
       setMembers(data?.members ?? []);
     } catch (err) {
-      if (err.name !== "AbortError") {
-        setError(err.message);
-      }
+      if (err.name !== "AbortError") setError(err.message);
     } finally {
-      if (!signal?.aborted) {
-        setLoading(false);
-      }
+      if (!signal?.aborted) setLoading(false);
     }
   }, []);
 
@@ -31,9 +25,7 @@ export function useMembers() {
     return () => controller.abort();
   }, [load]);
 
-  const refetch = useCallback(() => {
-    load();
-  }, [load]);
+  const refetch = useCallback(() => load(), [load]);
 
   return { members, loading, error, refetch };
 }

@@ -4,7 +4,6 @@ const API_BASE =
 async function request(path, options = {}) {
   try {
     const response = await fetch(`${API_BASE}${path}`, options);
-
     const data = await response.json().catch(() => null);
 
     if (!response.ok) {
@@ -17,34 +16,24 @@ async function request(path, options = {}) {
 
     return data;
   } catch (error) {
-    if (error.name === "AbortError") {
-      throw error;
-    }
-
-    // fetch throws TypeError when network is unreachable / CORS / DNS fails
+    if (error.name === "AbortError") throw error;
     if (error instanceof TypeError) {
       throw new Error(
         "Network error. Please check your internet connection or the API availability."
       );
     }
-
     throw error;
   }
 }
 
 export function getMembers(signal) {
-  return request("/api/members", {
-    method: "GET",
-    signal,
-  });
+  return request("/api/members", { method: "GET", signal });
 }
 
 export function checkAvailability(payload, signal) {
   return request("/api/availability/check", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
     signal,
   });
